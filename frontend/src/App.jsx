@@ -8,6 +8,7 @@ import Home from './pages/Home/Home'
 import SignUp from './pages/SignUp/SignUp'
 import Login from './pages/Login/Login'
 import Post from './pages/Post/Post'
+import { Toaster } from 'react-hot-toast'
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path='/post/:postId' element={<Post />} />
         <Route path='/profile/:username' element={<Profile />} />
       </Routes>
+      <Toaster />
     </Layout>
   )
 }
