@@ -1,67 +1,64 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-
 
 const initialState = {
     name: "",
     username: "",
     email: "",
     password: "",
-}
+};
+
 const SignUpForm = () => {
     const [state, setState] = useState(initialState);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setState((prevState) => ({ ...prevState, [name]: value }));
     };
 
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const { name, username, email, password } = state;
 
-        try {
-            const userSingup = {
-                name,
-                username,
-                email,
-                password,
-            };
+        setIsLoading(true);
 
-            const response = await fetch('https://linkedin-clone-mern.onrender.com/api/v1/auth/signup', {
+        try {
+            const res = await fetch(`https://linkedin-clone-mern.onrender.com/api/v1/auth/signup`, {
                 headers: {
                     "Content-Type": "application/json",
                 },
                 method: "POST",
-                body: JSON.stringify(userSingup),
-                credentials: "include",  // This sends cookies along with the request
+                body: JSON.stringify({ name, username, email, password }),
+                credentials: "include",
             });
 
-
-            if (response.ok) {
-                const data = await response.json();
+            if (res.ok) {
+                const data = await res.json();
                 if (data.success) {
-                    toast.success(data.message, {
-                        position: 'top-center'
-                    });
-                    setState(initialState);
+                    toast.success(data.message, { position: 'top-center' });
+                    window.location.reload();
                 } else {
-                    toast.error(data.message, {
-                        position: 'top-center'
-                    });
+                    toast.error(data.message, { position: 'top-center' });
                 }
             } else {
-                toast.error("There was a problem with your request.", {
-                    position: 'top-right'
-                });
+                const errorData = await res.json();
+                console.error("Failed to sign up:", res.statusText, errorData);
+                toast.error(errorData.message || "Sign-up failed", { position: 'top-center' });
             }
         } catch (error) {
-            setState(initialState);
+            console.error("Error during sign-up:", error);
             toast.error(error.message || "An error occurred");
+        } finally {
+            setIsLoading(false);
+            setState(initialState);
+
         }
     };
 
-    // console.log(state);
+
     return (
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
             <input
@@ -81,7 +78,6 @@ const SignUpForm = () => {
                 className='w-full outline-none focus:outline-red-200 rounded-md p-2 outline-black'
                 required
                 onChange={handleChange}
-
             />
             <input
                 type='email'
@@ -91,7 +87,6 @@ const SignUpForm = () => {
                 className='w-full outline-none focus:outline-red-200 rounded-md p-2 outline-black'
                 required
                 onChange={handleChange}
-
             />
             <input
                 type='password'
@@ -101,15 +96,17 @@ const SignUpForm = () => {
                 className='w-full outline-none focus:outline-red-200 rounded-md p-2 outline-black'
                 required
                 onChange={handleChange}
-
             />
-
-            <button type='submit' className='bg-blue-500 hover:bg-blue-700 p-2 text-white w-full rounde'>
-                {/* {isLoading ? <Loader className='size-5 animate-spin' /> : "Agree & Join"} */}
-                SignUp
+            <button
+                type='submit'
+                className='bg-blue-500 hover:bg-blue-700 p-2 text-white w-full rounded'
+                disabled={isLoading}
+            >
+                {isLoading ? "Submitting..." : "Sign Up"}
             </button>
         </form>
-    )
-}
+    );
+};
 
-export default SignUpForm
+export default SignUpForm;
+
